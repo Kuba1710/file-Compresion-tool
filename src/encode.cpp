@@ -1,5 +1,6 @@
 #include "encode.hpp"
 #include "string"
+#include "iostream"
 #include <cstdlib>
 
 void Encode::readFile(int argc, char** argv)
@@ -8,9 +9,99 @@ void Encode::readFile(int argc, char** argv)
     int t;
     if(argc <= 2)
     {
-        argv[2]=(char *)std::malloc(sizeof(char)*(std::strlen(argv[1])+std::strlen(compressed_extension)+1));
+        argv[2]=(char *)std::malloc(sizeof(char)*(std::strlen(argv[1])+std::strlen(compressed_extension.c_str())+1));
         std::strcpy(argv[2],argv[1]);
-        std::strcpy(argv[2],compressed_extension);
+        std::strcpy(argv[2],compressed_extension.c_str());
         argc++;
     }
+    else{ return; };
+
+    fp = fopen(argv[1], "rb");
+    if(fp == nullptr){ std::cout << "error, wrong input"; return;};
+    while(fread(&ch,sizeof(char),1,fp)!=0) { processFile(ch);};
 };
+
+void Encode::processFile(char c)
+{
+    std::unique_ptr<Encode::node> p, q, m;
+
+    if(head == nullptr)
+    {
+        head = createNode(c);
+        return;
+    }
+
+    p = std::move(head);
+    q = nullptr;
+
+    if(p->character == c)
+    {
+        p->code+=1;
+        if(p->next == nullptr)
+            return;
+        if(p->count > p->next->count)
+        {
+            head = std::move(p->next);
+            addNodeToLinkedList(std::move(p), std::move(head));
+        }
+        return;
+    }
+
+    while(p->next != nullptr && p->character != c)
+    {
+        q = std::move(p);
+        p = std::move(q->next);
+    }
+
+    if(p->character == c)
+    {
+        p->character += 1;
+        if(p->next == nullptr)
+            return;
+        if(p->count > p->next->count)
+        {
+            q->next = std::move(p->next);
+            addNodeToLinkedList(std::move(p), std::move(head));
+        };
+    }
+    else
+    {
+        q = createNode(c);
+        q->next = std::move(head);
+        head = q;
+    }
+}
+
+void Encode::addNodeToLinkedList(std::unique_ptr<Encode::node> p, std::unique_ptr<Encode::node> m)
+{
+    if(m->next == nullptr)
+    {
+        m->next = std::move(p);
+        return;
+    }
+
+    while(m->next->count < p->count)
+    {
+        m = std::move(m->next);
+        if(m->next == nullptr)
+        {
+            m->next = std::move(p);
+            return;
+        }
+    }
+
+    p->next = std::move(m->next);
+    m->next = std::move(p);
+}
+
+std::unique_ptr<Encode::node> Encode::createNode(char c)
+{
+    auto temp = std::make_unique<node>();
+    temp->character = c;
+    temp->count = 1;
+    temp->type = nodeType::leaf;
+    temp->next = nullptr;
+    temp->left = nullptr;
+    temp->right = nullptr;
+    return temp;
+}
