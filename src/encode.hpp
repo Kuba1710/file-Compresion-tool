@@ -11,7 +11,7 @@ class Encode
 public:
     Encode(){};
     void readFile(int argc, char** argv);
-    void processFile(char c);
+    void processFile(const char* c);
     void createTree();
     void createCode();
     void codeToWords();
@@ -20,16 +20,16 @@ public:
 private:
     struct node
     {
-        char character;
+        const char* character;
         int count;
-        char* code;
+        const char* code;
         nodeType type;
         std::unique_ptr<node> next;
         std::unique_ptr<node> left;
         std::unique_ptr<node> right;        
     };
 
-    std::unique_ptr<node> createNode(char c);
+    std::unique_ptr<node> createNode(const char* c);
     void addNodeToLinkedList(std::unique_ptr<node> p,std::unique_ptr<node> m);
 
     std::unique_ptr<node> head{nullptr};
