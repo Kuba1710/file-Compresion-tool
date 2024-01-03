@@ -37,7 +37,7 @@ void Encode::processFile(const char* c)
 
     if(p->character == c)
     {
-        p->code+=1;
+        p->count+=1;
         if(p->next == nullptr)
             return;
         if(p->count > p->next->count)
