@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <memory>
+#include <string>
 
 enum class nodeType{
     start,
@@ -30,10 +31,10 @@ private:
     };
 
     std::unique_ptr<node> createNode(const char* c);
-    void addNodeToLinkedList(std::unique_ptr<node> p,std::unique_ptr<node> m);
+    void addNodeToLinkedList(std::unique_ptr<node> p,std::shared_ptr<node> m);
 
-    std::unique_ptr<node> head{nullptr}; //shared ptr will be better option propably
-    std::unique_ptr<node> root{nullptr};
+    std::shared_ptr<node> head{nullptr}; //shared ptr will be better option propably
+    std::shared_ptr<node> root{nullptr};
     FILE *fp, *fp1;
     std::string compressed_extension{".spd"};
 

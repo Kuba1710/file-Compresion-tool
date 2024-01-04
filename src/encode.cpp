@@ -32,7 +32,7 @@ void Encode::processFile(const char* c)
         return;
     }
 
-    p = std::move(head);
+    p = std::make_unique<Encode::node>(*head);
     q = nullptr;
 
     if(p->character == c)
@@ -43,7 +43,7 @@ void Encode::processFile(const char* c)
         if(p->count > p->next->count)
         {
             head = std::move(p->next);
-            addNodeToLinkedList(std::move(p), std::move(head));
+            addNodeToLinkedList(std::move(p), head);
         }
         return;
     }
@@ -68,12 +68,12 @@ void Encode::processFile(const char* c)
     else
     {
         q = createNode(c);
-        q->next = std::move(head);
+        q->next = std::make_unique<Encode::node>(*head);
         head = std::move(q);
     }
 }
 
-void Encode::addNodeToLinkedList(std::unique_ptr<Encode::node> p, std::unique_ptr<Encode::node> m)
+void Encode::addNodeToLinkedList(std::unique_ptr<Encode::node> p, std::shared_ptr<Encode::node> m)
 {
     if(m->next == nullptr)
     {
