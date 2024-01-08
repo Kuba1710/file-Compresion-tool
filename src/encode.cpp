@@ -111,6 +111,7 @@ void Encode::createTree()
 {
     std::unique_ptr<Encode::node> p;
     std::unique_ptr<Encode::node> q;
+    p = std::make_unique<Encode::node>(*head);
 
     while( p != nullptr)
     {
@@ -139,4 +140,121 @@ void Encode::createTree()
     }
 
     root = std::move(q);
+}
+
+void Encode::generateCode(std::shared_ptr<Encode::node> p, char* code)
+{
+    char* leftCode;
+    char* rightCode;
+    static std::unique_ptr<Encode::node> s;
+    static int flag;
+
+    if( p != nullptr)
+    {
+        if(p->type == nodeType::leaf)
+        {
+            if(flag == 0)
+            {
+                flag = 1;
+                head = p;
+            }
+            else
+                s->next = std::make_unique<Encode::node>(*p);
+            
+            p->next = nullptr;
+            s = std::make_unique<Encode::node>(*p);
+        }
+
+        p->code = code;
+        leftCode = (char *)malloc(strlen(code)+2);
+        rightCode = (char *)malloc(strlen(code)+2);
+        generateCode(std::make_shared<Encode::node>(p->left), leftCode);
+        generateCode(std::make_shared<Encode::node>(p->right), rightCode);
+    }
+}
+
+void Encode::writeHeader(FILE* file)
+{
+    tableOfCodes table;
+    std::unique_ptr<Encode::node> p = std::make_unique<Encode::node>(*head);
+    int temp = 0;
+    int i = 0;
+
+    while( p != nullptr)
+    {
+        temp+=(strlen(p->code)) * (p->count);
+        if(strlen(p->code) > 16)
+            std::cout << "code is too long";
+        temp %= 8;
+        i++;
+        p = std::move(p->next);
+    }
+
+    i == 256 ? N = 0 : N = i;
+
+    p = std::make_unique<Encode::node>(*head);
+
+    while( p != nullptr)
+    {
+        table.x = p->character;
+        strcpy(table.code, p->code);
+        fwrite(&table,sizeof(tableOfCodes),1,file);
+        p = std::move(p->next);
+    }
+
+    padding = 8-(char)temp;
+    fwrite(&padding,sizeof(char),1,file);
+    for(i=0;i<padding;i++)
+        writeBit(0,file);
+}
+
+void Encode::writeBit(int bit, FILE* file)
+{
+    static char byte;
+    static char count;
+    char temp;
+
+    if(bit == 1)
+    {
+        temp = 1;
+        temp = temp<<(7-count);
+        byte = byte | temp;
+    }
+
+    count++;
+
+    if(count == 8)
+    {
+        fwrite(&byte, sizeof(char), 1, file);
+        count = 0;
+        byte = 0;
+        return;
+    }
+    return;
+}
+
+void Encode::writeCode(const char* character, FILE* file)
+{
+    char* code;
+    code = extractCode(character);
+    while( *code != '\0')
+    {
+        *code == '1' ? writeBit(1, file) : writeBit(0, file);
+        code++;
+    }
+}
+
+char* Encode::extractCode(const char* character)
+{
+    std::unique_ptr<node> p = std::make_unique<Encode::node>(*head);
+
+    while( p != nullptr)
+    {
+        if( p->character == character)
+            return p->code;
+        
+        p = std::move(p->next);
+    }
+
+    return nullptr;
 }
