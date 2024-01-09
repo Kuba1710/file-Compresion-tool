@@ -24,7 +24,7 @@ void Encode::readFile(int argc, char** argv)
 
 void Encode::processFile(const char* c)
 {
-    std::unique_ptr<Encode::node> p, q, m;
+    std::unique_ptr<node> p, q, m;
 
     if(head == nullptr)
     {
@@ -32,7 +32,7 @@ void Encode::processFile(const char* c)
         return;
     }
 
-    p = std::make_unique<Encode::node>(*head);
+    p = std::make_unique<node>(*head);
     q = nullptr;
 
     if(p->character == c)
@@ -68,12 +68,12 @@ void Encode::processFile(const char* c)
     else
     {
         q = createNode(c);
-        q->next = std::make_unique<Encode::node>(*head);
+        q->next = std::make_unique<node>(*head);
         head = std::move(q);
     }
 }
 
-void Encode::addNodeToLinkedList(std::unique_ptr<Encode::node> p, std::shared_ptr<Encode::node> m)
+void Encode::addNodeToLinkedList(std::unique_ptr<node> p, std::shared_ptr<node> m)
 {
     if(m->next == nullptr)
     {
@@ -95,7 +95,7 @@ void Encode::addNodeToLinkedList(std::unique_ptr<Encode::node> p, std::shared_pt
     m->next = std::move(p);
 }
 
-std::unique_ptr<Encode::node> Encode::createNode(const char* c)
+std::unique_ptr<node> Encode::createNode(const char* c)
 {
     auto temp = std::make_unique<node>();
     temp->character = c;
@@ -109,9 +109,9 @@ std::unique_ptr<Encode::node> Encode::createNode(const char* c)
 
 void Encode::createTree()
 {
-    std::unique_ptr<Encode::node> p;
-    std::unique_ptr<Encode::node> q;
-    p = std::make_unique<Encode::node>(*head);
+    std::unique_ptr<node> p;
+    std::unique_ptr<node> q;
+    p = std::make_unique<node>(*head);
 
     while( p != nullptr)
     {
@@ -142,11 +142,11 @@ void Encode::createTree()
     root = std::move(q);
 }
 
-void Encode::generateCode(std::shared_ptr<Encode::node> p, char* code)
+void Encode::generateCode(std::shared_ptr<node> p, char* code)
 {
     char* leftCode;
     char* rightCode;
-    static std::unique_ptr<Encode::node> s;
+    static std::unique_ptr<node> s;
     static int flag;
 
     if( p != nullptr)
@@ -159,24 +159,24 @@ void Encode::generateCode(std::shared_ptr<Encode::node> p, char* code)
                 head = p;
             }
             else
-                s->next = std::make_unique<Encode::node>(*p);
+                s->next = std::make_unique<node>(*p);
             
             p->next = nullptr;
-            s = std::make_unique<Encode::node>(*p);
+            s = std::make_unique<node>(*p);
         }
 
         p->code = code;
         leftCode = (char *)malloc(strlen(code)+2);
         rightCode = (char *)malloc(strlen(code)+2);
-        generateCode(std::make_shared<Encode::node>(p->left), leftCode);
-        generateCode(std::make_shared<Encode::node>(p->right), rightCode);
+        generateCode(std::make_shared<node>(p->left), leftCode);
+        generateCode(std::make_shared<node>(p->right), rightCode);
     }
 }
 
 void Encode::writeHeader(FILE* file)
 {
     tableOfCodes table;
-    std::unique_ptr<Encode::node> p = std::make_unique<Encode::node>(*head);
+    std::unique_ptr<node> p = std::make_unique<node>(*head);
     int temp = 0;
     int i = 0;
 
@@ -192,7 +192,7 @@ void Encode::writeHeader(FILE* file)
 
     i == 256 ? N = 0 : N = i;
 
-    p = std::make_unique<Encode::node>(*head);
+    p = std::make_unique<node>(*head);
 
     while( p != nullptr)
     {
@@ -246,7 +246,7 @@ void Encode::writeCode(const char* character, FILE* file)
 
 char* Encode::extractCode(const char* character)
 {
-    std::unique_ptr<node> p = std::make_unique<Encode::node>(*head);
+    std::unique_ptr<node> p = std::make_unique<node>(*head);
 
     while( p != nullptr)
     {

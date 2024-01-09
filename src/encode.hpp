@@ -7,6 +7,17 @@ enum class nodeType{
     leaf
 };
 
+struct node
+{
+    const char* character;
+    int count;
+    char* code;
+    nodeType type;
+    std::unique_ptr<node> next;
+    std::unique_ptr<node> left;
+    std::unique_ptr<node> right;        
+};
+
 class Encode
 {
 public:
@@ -18,18 +29,10 @@ public:
     void codeToWords();
     void writeCode(const char* , FILE* f); //zmienic potem nazwę
     void writeHeader(FILE* file);
+    void generateCode(std::shared_ptr<node> root, char* code);
+    std::shared_ptr<node> getRoot() { return root; };
 
 private:
-    struct node
-    {
-        const char* character;
-        int count;
-        char* code;
-        nodeType type;
-        std::unique_ptr<node> next;
-        std::unique_ptr<node> left;
-        std::unique_ptr<node> right;        
-    };
 
     struct tableOfCodes
     {
@@ -39,7 +42,6 @@ private:
 
     std::unique_ptr<node> createNode(const char* c);
     void addNodeToLinkedList(std::unique_ptr<node> p,std::shared_ptr<node> m);
-    void generateCode(std::shared_ptr<node> root, char* code);
     void writeBit(int bit, FILE* file);
     char* extractCode(const char* character);
 
