@@ -2,6 +2,7 @@
 #include "string"
 #include "iostream"
 #include <cstdlib>
+#include <cstring>
 
 void Encode::readFile(int argc, char** argv)
 {
@@ -51,7 +52,7 @@ void Encode::processFile(const char* c)
     while(p->next != nullptr && p->character != c)
     {
         q = std::move(p);
-        p = std::move(q->next);
+        p = std::move(std::make_unique<node>(*p->next));
     }
 
     if(p->character == c)
@@ -121,12 +122,12 @@ void Encode::createTree()
         q->count = p->count;
         if(p->next != nullptr)
         {
-            p = std::move(p->next);
+            p = std::move(std::make_unique<node>(*p->next));
             q->right = std::move(p);
             q->count += p->count;
         }
 
-        p = std::move(p->next);
+        p = std::move(std::make_unique<node>(*p->next));
         if( p == nullptr)
             break;
         
@@ -142,7 +143,7 @@ void Encode::createTree()
     root = std::move(q);
 }
 
-void Encode::generateCode(std::shared_ptr<node> p, char* code)
+void Encode::generateCode(std::shared_ptr<node> p, const char* code)
 {
     char* leftCode;
     char* rightCode;
@@ -168,8 +169,8 @@ void Encode::generateCode(std::shared_ptr<node> p, char* code)
         p->code = code;
         leftCode = (char *)malloc(strlen(code)+2);
         rightCode = (char *)malloc(strlen(code)+2);
-        generateCode(std::make_shared<node>(p->left), leftCode);
-        generateCode(std::make_shared<node>(p->right), rightCode);
+        generateCode(p->left, leftCode);
+        generateCode(p->right, rightCode);
     }
 }
 
@@ -187,7 +188,7 @@ void Encode::writeHeader(FILE* file)
             std::cout << "code is too long";
         temp %= 8;
         i++;
-        p = std::move(p->next);
+        p = std::move(std::make_unique<node>(*p->next));
     }
 
     i == 256 ? N = 0 : N = i;
@@ -199,7 +200,7 @@ void Encode::writeHeader(FILE* file)
         table.x = p->character;
         strcpy(table.code, p->code);
         fwrite(&table,sizeof(tableOfCodes),1,file);
-        p = std::move(p->next);
+        p = std::move(std::make_unique<node>(*p->next));
     }
 
     padding = 8-(char)temp;
@@ -235,7 +236,7 @@ void Encode::writeBit(int bit, FILE* file)
 
 void Encode::writeCode(const char* character, FILE* file)
 {
-    char* code;
+    const char* code;
     code = extractCode(character);
     while( *code != '\0')
     {
@@ -244,7 +245,7 @@ void Encode::writeCode(const char* character, FILE* file)
     }
 }
 
-char* Encode::extractCode(const char* character)
+const char* Encode::extractCode(const char* character)
 {
     std::unique_ptr<node> p = std::make_unique<node>(*head);
 
@@ -253,7 +254,7 @@ char* Encode::extractCode(const char* character)
         if( p->character == character)
             return p->code;
         
-        p = std::move(p->next);
+        p = std::move(std::make_unique<node>(*p->next));
     }
 
     return nullptr;

@@ -1,10 +1,11 @@
 #include "encode.hpp"
+#include <iostream>
 
 int main(int argc, char** argv)
 {
     auto encode = std::make_unique<Encode>();
     auto root = encode->getRoot(); // slabe rozwiazanie potem trzeba zmienic
-
+    
     encode->readFile(argc, argv);
     encode->createTree();
     encode->generateCode(root, "\0");
@@ -20,5 +21,7 @@ int main(int argc, char** argv)
         encode->writeCode(ch, fp1);
 
     fclose(fp1);
+
+    return 0;
     
 }
